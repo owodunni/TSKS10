@@ -1,0 +1,129 @@
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage{times}
+\usepackage{mathptmx}  
+\usepackage{spverbatim}
+
+%% Text-kodning, språk samt PS-font
+\usepackage[swedish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ae,aecompl}
+
+% % bitmap-grafik
+\usepackage{graphicx}
+% % matematik
+\usepackage{mathtools}
+\usepackage{latexsym}
+\usepackage{graphicx}
+
+\raggedbottom
+\sloppy
+
+\title{Laborationsrapport i TSKS10 \emph{Signaler, Information och Kommunikation}}
+
+\author{Alexander Poole \\ alepo020, 920829-0057 }
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Inledning}
+
+Denna laboration gick ut på att demodulera en smalbandig signal som blivit I/Q-modulerad och passerat ett delvis okänt filter. Givet är signalen $y(t)$ som har blivit samplad i $400$ kHz, se (\ref{ekv:y(t)}).
+
+Då laborationen har blivit korrekt löst ska $y(t)$ demoduleras och två ordspråk identifierats 
+
+\begin{equation}
+y(t)=x(t-\tau_1)+0.9x(t-\tau_2)
+\label{ekv:y(t)}
+\end{equation} 
+
+Det är givet att $x(t)$ är en smalbandig signal som kan beskrivas med följande formel (\ref{ekv:x-signal}). Där $w(t)$ är en störsignal som innehåller två andra signaler som är I/Q-modulerade kring andra bärfrekvenser.
+
+\begin{equation}
+x(t)=x_I(t)\cos(2\pi f_c t)-x_Q(t)\sin(2\pi f_c t)+w(t)
+\label{ekv:x-signal}
+\end{equation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Metod}
+
+Jag började med att försöka bestämma bärfrekvensen $f_c$, detta gjordes genom att Fouriertransformera $y(t)$ till $Y(f)$. Figur \ref{fig:yf} visar de tre olika smalbandiga signaler som $y(t)$ innehåller. Utifrån labhandledningen vet man att bärfrekvensen, $f_c$, för dessa signaler är en multipel av $19$ kHz. Från figur \ref{fig:yf} kan man avläsa att de olika signalerna har $f_c=38$ kHz, $f_c=95$ kHz och $f_c=133$ kHz. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{bilder/y-signal.png}
+\caption{$Y(f)$ Fouiertransformen av $y(t)$}
+\label{fig:yf}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{bilder/y-filtrerad.png}
+\caption{$y(t)$s $3$ olika smalbandiga signaler.}
+\label{fig:y-filtrerad}
+\end{figure}
+
+Från labhandledningen får man också fram att den smalbandiga signalen i $y(t)$ som innehåller $x(t)$ består av tre olika signaler, först musik, sedan tal och sist brus. Genom att köra $y(t)$ genom tre olika bandpassfilter kan vi isolera respektive smalbandiga signal kring deras olika bärfrekvenser. Från figur \ref{fig:y-filtrerad} ser vi att den enda signal som kan innehålla $x(t)$ är den med bärfrekvens $f_c = 38$ kHz.
+
+\begin{equation}
+\begin{split}
+z(\tau) = \int_{-\infty}^\infty y(t)y(t+\tau)\,\mathrm{d}t=
+\int_{-\infty}^\infty (x(t-\tau_1)\\x(t-\tau_1+\tau)+0,9x(t-\tau_2)x(t-\tau_1+\tau)\\
++ 0,9x(t-\tau_2)x(t-\tau_1+\tau) + \\0,81x(t-\tau_2)x(t-\tau_2+\tau)\,\mathrm{d}t
+\end{split} 
+\label{ekv:mangfald}
+\end{equation} 
+
+Nästa sak som ska bestämmas är $|\tau_1 - \tau_2|$. För att bestämma detta utnytjades att en tredjedel av signalen är vitt brus. Detta då vitt brus är helt okorrelerat. Tittar man på (\ref{ekv:mangfald}) ser man att det även bör finnas toppar vid  $|\tau_1-\tau_2|$ detta på grund av ekot i signalen. Detta bekräftas även genom att kolla på figur \ref{fig:corr} som har två toppar vid $\pm 0.41$ sekunder. Topparnas avstånd till centrum motsvarar ekots tidförskjutning d.v.s. $|\tau_1-\tau_2| = 0.41$ sekunder.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{bilder/correlerad.png}
+\caption{Mångtydlighetsfunktionen av det vita bruset i signalen $y(t)$ runt  $f_c = 38$ kHz}
+\label{fig:corr}
+\end{figure}
+
+Det är inte nödvändigt att behöva ta reda på $\tau_1$ och $\tau_2$ det intressanta för att kunna skapa ett inversfilter är filtrets fördröjning d.v.s $|\tau_1-\tau_2|$. Vet man $\tau_1-\tau_2$ så kan man skapa ett inversfilter för att ta bort ekot i $y(t)$. Först tas de sampler som finns innan ekot startade d.v.s. de första $0,41$ sekunderan av $y(t)$, sedan används (\ref{ekv:invfilt}) för att filtrera bort ekot och på så sätt få ut $x_n(t)$. $x_n(t)$ är inte samma som insignalen utan en tidsförskjuten variant av den, vi vet ju fortfarande inte värdet på $\tau_1$ och $\tau_2$. Små tidsförskjutningar motsvarar en fasförskjutning för smalbandiga signaler.
+
+\begin{equation}
+x_n(t)=y(t) - 0.9x(t-|\tau_1-\tau_2|)
+\label{ekv:invfilt}
+\end{equation} 
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.4\textwidth]{bilder/x-signal.png}
+%\caption{Visar y(t) vid $f_c = 38$ kHz före och efter inversfiltrering.}
+%\label{fig:x-signal}
+%\end{figure}
+
+Det som är kvar för att kunna höra de två ordspråken är att I/Q-demodulera $x_n(t)$ till $x_{nI}(t)$ och $x_{nQ}(t)$, de tas också och lågpassfiltreras för att bli av med högfrekvent brus, detta görs med (\ref{ekv:xi}).  
+Med hjälp av fasförskjutningskonstanten $\phi$ kan vi motverka fasförskjutningen som uppståt från inversfiltret. $\phi$ prövas fram genom att testa värden på $\phi$ mellan $0$ och $\frac{\pi}{2}$. Värden större än $\frac{\pi}{2}$ är onödiga då $\sin$ blir $\cos$ och vise versa. För signalen i denna rapport gjorde $\phi = \frac{\pi}{6}$ att man kunde urskilja ordspråken. 
+
+\begin{equation}
+\begin{split}
+x_{nI}(t)= \mathcal{H}^{LP} 2x_n(t)\cos(2\pi f_c t - \phi)\\
+x_{nQ}(t)= \mathcal{H}^{LP} -2x_n(t)\sin(2\pi f_c t - \phi)
+\end{split}
+\label{ekv:xi}
+\end{equation} 
+
+\section{Resultat och slutsats}
+
+Jag har funnit att:
+\begin{itemize}
+\item Bärfrekvensen var $f_c=38$ kHz
+\item $|\tau_1 - \tau_2|$ var $0.41$ s
+\item Signalen innehöll ordspråket "Man ska inte kasta sten i glashus" 
+\item Signalen innehöll ordspråket "Liten tuva stjälper ofta stort lass"
+\item Fasförskjutningen var $\phi= \frac{\pi}{6}$
+\end{itemize}
+\clearpage
+
+
+\end{document}
+
+
