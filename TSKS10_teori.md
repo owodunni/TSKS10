@@ -5,11 +5,6 @@
 
 2. Vad innebär det att en signal är strikt tidsbegränsad? Approximativt tidsbegränsad?
   2. En signal är strikt tidsbegränsad om hela signalen bor inom ett intervall [-T/2,T/2]. Den är approximativt tidsbegränsad om den är ungefär noll utanför [-T/2,T/2].
-  3. easdf
-  4. asdva
-  5. sdv
-  6. nbtn
-  7. 
 
 3. Definiera energin av en signal.
   3. E_x 
